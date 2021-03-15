@@ -19,8 +19,9 @@ A = [-((r2+r1)/(r1*r2*c1)),1/(r2*c1),-1/(r2*c1);...
     -1/(r2*c3),1/(r2*c3),-(r3+r2)/(r2*r3*c3)];
 B = [1/(r1*c1);0;0];
 C = [-0 1 0];
+D = 0;
 % Definición de varaible tipo ss
-sys = ss(A, B, C, 0);
+sys = ss(A, B, C, D);
 %% Inciso 2
 n = length (A);
 Gamma = ctrb(A, B);
@@ -36,13 +37,13 @@ G = C * (inv((s * eye(3)) - A)) * B;
 OG_poles = pole(G);
 % Vector de polos cercano a los polos originales
 % p = [-1.1001e3 (-10 + 0.0948i) (-10 - 0.0948i)];
-p = [-1.1001e3 (-100 + 150i) (-100 - 120i)]; 
+p = [-1100.1 (-100 + 150i) (-100 - 150i)]; 
 %% Inciso 4
 K_pp = place(A, B, p); 
 %% Inciso 5
 A_cl = A - (B * K_pp);
 % Definición de nueva varaible tipo ss
-sys_cl = ss(A_cl, B, C, 0);
+sys_cl = ss(A_cl, B, C, D);
 %% Inciso 6
 [u,t] = gensig("square", 1/0.5 , 4, 0.0001);
 u = u + 1;
@@ -88,3 +89,4 @@ suptitle("Comparación de Salidas");
 hold off;
 % Verificación
 linearSystemAnalyzer(Nbar * sys_cl);
+%% In

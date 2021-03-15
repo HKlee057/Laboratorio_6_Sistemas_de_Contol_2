@@ -19,8 +19,9 @@ A = [-((r2+r1)/(r1*r2*c1)),1/(r2*c1),-1/(r2*c1);...
     -1/(r2*c3),1/(r2*c3),-(r3+r2)/(r2*r3*c3)];
 B = [1/(r1*c1);0;0];
 C = [-0 1 0];
+D = 0;
 % Definición de varaible tipo ss
-sys = ss(A, B, C, 0);
+sys = ss(A, B, C, D);
 %% Inciso 2
 n = length (A);
 Gamma = ctrb(A, B);
@@ -42,7 +43,7 @@ K_pp = place(A, B, p);
 %% Inciso 5
 A_cl = A - (B * K_pp);
 % Definición de nueva varaible tipo ss
-sys_cl = ss(A_cl, B, C, 0);
+sys_cl = ss(A_cl, B, C, D);
 %% Inciso 6
 [u,t] = gensig("square", 1/0.5 , 4, 0.0001);
 u = u + 1;
@@ -88,3 +89,56 @@ suptitle("Comparación de Salidas");
 hold off;
 % Verificación
 linearSystemAnalyzer(Nbar * sys_cl);
+%% Inciso 12
+p_s2 = [-1100.1 (-250 + 0.0948i) (-250 - 0.0948i)]; 
+%% Inciso 13
+K_pp_s2 = place(A, B, p_s2); 
+% -------------------------------------------------------------------------
+A_cl_s2 = A - (B * K_pp_s2);
+% Definición de nueva varaible tipo ss
+sys_cl_s2 = ss(A_cl_s2, B, C, D);
+% -------------------------------------------------------------------------
+[u2,t2] = gensig("square", 1/0.5 , 4, 0.0001);
+u2 = u2 + 1;
+% -------------------------------------------------------------------------
+% Definición de vectores
+[y1_2,t2,X1_2]=lsim(sys,u2,t2);
+[y2_2,t2,X2_2]=lsim(sys_cl_s2,u2,t2);
+% Gráficas
+figure(3); 
+clf;
+hold on;
+subplot(2,1,1);
+plot(t2,y1_2);
+title("Gráfica de Sistema Original");
+xlabel('t');
+ylabel('y Original');
+subplot(2,1,2);
+plot(t2,y2_2);
+title("Gráfica de Sistema en Lazo Cerrado");
+xlabel('t');
+ylabel('y Modificado')
+suptitle("Salidas de Sistema");
+hold off;
+% -------------------------------------------------------------------------
+% Factor de Escala
+Nbar_2 = rscale(sys, K_pp_s2);
+[y3_2,t2,X3_2]=lsim(sys_cl_s2, Nbar_2*u2, t2);
+% Gráficas
+figure(4); 
+clf;
+hold on;
+subplot(2,1,1);
+plot(t2,y2_2);
+title("Gráfica SIN ESCALAR");
+xlabel('t');
+ylabel('y');
+subplot(2,1,2);
+plot(t2,y3_2);
+title("Gráfica ESCALADA");
+xlabel('t');
+ylabel('y')
+suptitle("Comparación de Salidas");
+hold off;
+% Verificación
+linearSystemAnalyzer(Nbar_2 * sys_cl_s2);
