@@ -33,3 +33,4 @@ end
 %% Inciso 3
 s = tf("s");
 G = C * (inv((s * eye(3)) - A)) * B;
+OG_poles = pole(G);
