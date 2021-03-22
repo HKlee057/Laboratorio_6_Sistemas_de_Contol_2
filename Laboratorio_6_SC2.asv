@@ -5,7 +5,7 @@
 % Sección 11 
 % Sistemas de Control 2
 %% Primera Parte - Diseño y Simulación
-load Variables_de_Estado.mat linsys1
+
 %% Inciso 1
 % Definición de varaibles
 r1 = 1e3;
@@ -90,27 +90,6 @@ suptitle("Comparación de Salidas");
 hold off;
 % Verificación
 linearSystemAnalyzer(Nbar * sys_cl);
-%% Inciso 11
-sys1=ss(linsys1.A,linsys1.B,linsys1.C,linsys1.D);
-%[y4,t,X4]=lsim(sys,u,t);
-% figure (8); clf;
-% hold on;
-% subplot(3,1,1);
-% plot(t,X4(:,1));
-% title("Gráfica de C1");
-% xlabel('t');
-% ylabel('Vc1');
-% subplot(3,1,2);
-% plot(t,X4(:,2));
-% title("Gráfica de C2");
-% xlabel('t');
-% ylabel('Vc2')
-% subplot(3,1,3);
-% plot(t,X4(:,3));
-% title("Gráfica de C3");
-% suptitle("Señal Cuadrada de 5V a 0.5Hz, Variables Linsys");
-% xlabel('t');
-% ylabel('Vc3')
 %% Inciso 12
 p_s2 = [-1100.1 (-250 + 0.0948i) (-250 - 0.0948i)]; 
 %% Inciso 13
