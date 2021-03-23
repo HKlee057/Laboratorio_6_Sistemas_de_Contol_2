@@ -27,19 +27,22 @@ int Timers = 1000;
 int frecdiv; //se define la freciencia por la que se va a dividir la frecuencia de 80MHz
 
 const int ss = PD_1; //se espesifica el salve select
+
+//-----------------------Se especifican Pines de entrada analogicos---------------------------
 const int IN = A0;
-const int C1 = A1; //El pin de netrada del potenciometro (ADC)
+const int C1 = A1; 
 const int C2 = A2;
 const int C3_1 = A3;
 const int C3_2 = A4;
 
+//---------------------Se inicializan las variables de estado---------------------------------
 int Vc1 = 0;
 int Vc2 = 0;
 int Vc3 = 0;
 int Vc3_1 = 0;
 int Vc3_2 = 0;
+//--------------------se especifica la referencia y salida del sistema-----------------------
 int Ref = 0;
-
 float u = 0;
 
 void setup() {
@@ -59,13 +62,13 @@ void loop() {
   // put your main code here, to run repeatedly: 
   
 }
+//------------------------------------Se crea la funcion para escribir al DAC------------------------------------
 void Write_DAC(int value, int slave_select) {
   //se apaga el pin para seleccionar el chip a utilizar
   digitalWrite(slave_select,LOW);
- 
   byte primero = (byte)(((value>>8) & 0b00001111) | (Gain<<5));// con el operador>> se realiza un shift, en este caso de 8 bits por 
                                            // lo que se descartan los 8 bits menos significativos y se realiza un 
-                                           // and con el valor 0xFF. Esto permite que los bits en 1 se mantengan 
+                                           // and con el valor 0b00001111. Esto permite que los bits en 1 se mantengan 
                                            //como 1 y los que estan en 0 se coloquen como 0
   byte segundo = (byte)(value & 0x00FF); //este realiza un and con los primero 8 bits del valor leido y reliza un and
                                        //esto con el proposito de que los primero 8 bits del valor values se asignen
@@ -75,6 +78,8 @@ void Write_DAC(int value, int slave_select) {
   // take the SS pin high to de-select the chip:
   digitalWrite(slave_select,HIGH);
 }
+
+//----------------------------------Configuracion del Timer----------------------------------------------------
 void configureTimer1A(){
   ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1); // Enable Timer 1 Clock
   ROM_IntMasterEnable(); // Enable Interrupts
