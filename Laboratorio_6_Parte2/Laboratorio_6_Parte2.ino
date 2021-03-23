@@ -11,6 +11,9 @@
 #include "driverlib/rom.h"
 #include "driverlib/timer.h"
 #include "driverlib/sysctl.h"
+
+#define Timers 1000
+#define frecdiv (80*Timers) //se define la freciencia por la que se va a dividir la frecuencia de 80MHz
 #define COTA_SUP 3.3
 #define COTA_INF 0
 #define Gain 1
@@ -23,8 +26,7 @@ float K_pp[3] = {0.1801,    2.3952,  -21.7918};
 const int Nbar = 6.8756;
 float K_pp[3] = {0.4801,    5.3955,  -57.1948}; 
 #endif
-int Timers = 1000;
-int frecdiv; //se define la freciencia por la que se va a dividir la frecuencia de 80MHz
+
 
 const int ss = PD_1; //se espesifica el salve select
 
@@ -36,19 +38,20 @@ const int C3_1 = A3;
 const int C3_2 = A4;
 
 //---------------------Se inicializan las variables de estado---------------------------------
-int Vc1 = 0;
-int Vc2 = 0;
-int Vc3 = 0;
-int Vc3_1 = 0;
-int Vc3_2 = 0;
+float Vc1 = 0;
+float Vc2 = 0;
+float Vc3 = 0;
+float Vc3_1 = 0;
+float Vc3_2 = 0;
 //--------------------se especifica la referencia y salida del sistema-----------------------
-int Ref = 0;
+float Ref = 0;
 float u = 0;
+int U = 0;
 
 void setup() {
-  frecdiv =(80*Timers);
   configureTimer1A();
   pinMode(ss,OUTPUT); //se especifica el pin PB_5 como salida
+  pinMode(IN,INPUT);
   pinMode(C1,INPUT);
   pinMode(C2,INPUT);
   pinMode(C3_1,INPUT);
@@ -66,7 +69,7 @@ void loop() {
 void Write_DAC(int value, int slave_select) {
   //se apaga el pin para seleccionar el chip a utilizar
   digitalWrite(slave_select,LOW);
-  byte primero = (byte)(((value>>8) & 0b00001111) | (Gain<<5));// con el operador>> se realiza un shift, en este caso de 8 bits por 
+  byte primero = (byte)(((value>>8) & 0b00001111) | (Gain<<5) | (0b01100000));// con el operador>> se realiza un shift, en este caso de 8 bits por 
                                            // lo que se descartan los 8 bits menos significativos y se realiza un 
                                            // and con el valor 0b00001111. Esto permite que los bits en 1 se mantengan 
                                            //como 1 y los que estan en 0 se coloquen como 0
@@ -113,11 +116,11 @@ void Timer1AHandler(void){
   //Required to launch next interrupt
   ROM_TimerIntClear(TIMER1_BASE, TIMER_A);
 //-----------------------------Se leen los voltajes de las terminales de los capacitores-----------------------------
-  Ref = analogRead(IN)*(COTA_SUP - COTA_INF)/4095;
-  Vc1 = analogRead(C1)*(COTA_SUP - COTA_INF)/4095;
-  Vc2 = analogRead(C2)*(COTA_SUP - COTA_INF)/4095;
-  Vc3_1 = analogRead(C3_1)*(COTA_SUP - COTA_INF)/4095;
-  Vc3_2 = analogRead(C3_2)*(COTA_SUP - COTA_INF)/4095;
+  Ref = analogRead(IN)*3.3/4095;
+  Vc1 = analogRead(C1)*3.3/4095;
+  Vc2 = analogRead(C2)*3.3/4095;
+  Vc3_1 = analogRead(C3_1)*3.3/4095;
+  Vc3_2 = analogRead(C3_2)*3.3/4095;
   Vc3 = Vc3_1 - Vc3_2;
 //-----------------------------------------Se implementa el controlador con retroalimenctacion y sus variables de estado---------------------------------------
     u=Ref*Nbar-((K_pp[0]*Vc1)+(K_pp[1]*Vc2)+(K_pp[2]*Vc3));
@@ -127,11 +130,11 @@ void Timer1AHandler(void){
       u=COTA_SUP;
     }
 //------------------------------------------Se especifica limite inferior para la salida del controlador--------------------------------------------
-    else if (u<COTA_INF)
+    if (u<COTA_INF)
     {
       u=COTA_INF;
     }
 //-----------------------------------------Se ingresas la salida del sistema al DAC-------------------------------------------------
-    u=u*4095/(COTA_SUP - COTA_INF);
-    Write_DAC(u, ss);
+    U=(int)((u-COTA_INF)*4095/(COTA_SUP-COTA_INF));
+    Write_DAC(U, ss);
 }
